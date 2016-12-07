@@ -1,0 +1,211 @@
+/*
+//Pass-through into Power BI
+SELECT
+    deviceID as Device,
+    TRY_CAST(locationLatitude as float) as Latitude,
+    TRY_CAST(locationLongitude as float) as Longitude,
+    TRY_CAST(locationSpeed as float) as Speed,
+    TRY_CAST(deviceOrientation as float) as Orientation,
+    TRY_CAST(altimeterRelativeAltitude as float) as Altitude,
+    TRY_CAST(System.TimeStamp as datetime) Time,
+    activity as Activity,
+    CASE deviceOrientation
+        WHEN '5' THEN 'Face Up'
+        WHEN '4' THEN 'Landscape Right'
+        WHEN '3' THEN 'Landscape Left'
+        WHEN '2' THEN 'Portrait Upside Down'
+        WHEN '1' THEN 'Portrait'
+        WHEN '6' THEN 'Face Down'
+        ELSE 'Unknown'
+    END AS Position,
+    TRY_CAST(motionYaw as float) as Yaw,
+    TRY_CAST(motionRoll as float) as Roll,
+    TRY_CAST(motionPitch as float) as Pitch,
+    TRY_CAST(locationMagneticHeading as float) as Heading
+INTO
+    [output]
+FROM
+    [input]
+*/
+
+//Recommended - Pass-through into Power BI filling missing values (https://docs.microsoft.com/en-us/azure/stream-analytics/stream-analytics-stream-analytics-query-patterns#query-example-fill-missing-values)
+WITH step1 AS (
+    SELECT
+        System.Timestamp AS windowEnd,
+        TopOne() OVER (ORDER BY windowEnd DESC) AS lastEvent
+    FROM
+        [input]
+    GROUP BY HOPPINGWINDOW(second, 20, 1)
+)
+SELECT
+    lastEvent.deviceID as Device,
+    TRY_CAST(lastEvent.locationLatitude as float) as Latitude,
+    TRY_CAST(lastEvent.locationLongitude as float) as Longitude,
+    TRY_CAST(lastEvent.locationSpeed as float) as Speed,
+    TRY_CAST(lastEvent.deviceOrientation as float) as Orientation,
+    TRY_CAST(lastEvent.altimeterRelativeAltitude as float) as Altitude,
+    windowEnd as Time,
+    lastEvent.activity as Activity,
+    CASE lastEvent.deviceOrientation
+        WHEN '5' THEN 'Face Up'
+        WHEN '4' THEN 'Landscape Right'
+        WHEN '3' THEN 'Landscape Left'
+        WHEN '2' THEN 'Portrait Upside Down'
+        WHEN '1' THEN 'Portrait'
+        WHEN '6' THEN 'Face Down'
+        ELSE 'Unknown'
+    END AS Position,
+    TRY_CAST(lastEvent.motionYaw as float) as Yaw,
+    TRY_CAST(lastEvent.motionRoll as float) as Roll,
+    TRY_CAST(lastEvent.motionPitch as float) as Pitch,
+    TRY_CAST(lastEvent.locationMagneticHeading as float) as Heading
+INTO
+    [output-powerbi]
+FROM step1;
+
+/*Pass-through into SQL DB*/
+/*SELECT
+    deviceID as Device,
+    TRY_CAST(locationLatitude as float) as Latitude,
+    TRY_CAST(locationLongitude  as float) as Longitude,
+    TRY_CAST(locationSpeed  as float) as Speed,
+    TRY_CAST(deviceOrientation as float) as Orientation,
+    TRY_CAST(altimeterRelativeAltitude  as float) as Altitude,
+    TRY_CAST(System.TimeStamp as datetime) Time,
+    activity as Activity,
+    CASE deviceOrientation
+        WHEN '5' THEN 'Face Up'
+        WHEN '4' THEN 'Landscape Right'
+        WHEN '3' THEN 'Landscape Left'
+        WHEN '2' THEN 'Portrait Upside Down'
+        WHEN '1' THEN 'Portrait'
+        WHEN '6' THEN 'Face Down'
+        ELSE 'Unknown'
+    END AS Position,
+    TRY_CAST(motionYaw  as float) as Yaw,
+    TRY_CAST(motionRoll  as float) as Roll,
+    TRY_CAST(motionPitch  as float) as Pitch,
+    TRY_CAST(locationMagneticHeading as float) as Heading
+INTO
+    [output-raw-events-sql]
+FROM
+    [input]
+*/
+
+/*Pass-through into Azure Blob Storage (can serialise as AVRO if required)*/
+/*SELECT
+    deviceID as Device,
+    TRY_CAST(locationLatitude as float) as Latitude,
+    TRY_CAST(locationLongitude  as float) as Longitude,
+    TRY_CAST(locationSpeed  as float) as Speed,
+    TRY_CAST(deviceOrientation as float) as Orientation,
+    TRY_CAST(altimeterRelativeAltitude  as float) as Altitude,
+    TRY_CAST(System.TimeStamp as datetime) Time,
+    activity as Activity,
+    CASE deviceOrientation
+        WHEN '5' THEN 'Face Up'
+        WHEN '4' THEN 'Landscape Right'
+        WHEN '3' THEN 'Landscape Left'
+        WHEN '2' THEN 'Portrait Upside Down'
+        WHEN '1' THEN 'Portrait'
+        WHEN '6' THEN 'Face Down'
+        ELSE 'Unknown'
+    END AS Position,
+    TRY_CAST(motionYaw  as float) as Yaw,
+    TRY_CAST(motionRoll  as float) as Roll,
+    TRY_CAST(motionPitch  as float) as Pitch,
+    TRY_CAST(locationMagneticHeading as float) as Heading
+INTO
+    [output-blob-avro]
+FROM
+    [input]
+*/
+
+/*Pass-through into Azure Table Storage*/
+/*SELECT
+    deviceID as Device,
+    TRY_CAST(locationLatitude as float) as Latitude,
+    TRY_CAST(locationLongitude  as float) as Longitude,
+    TRY_CAST(locationSpeed  as float) as Speed,
+    TRY_CAST(deviceOrientation as float) as Orientation,
+    TRY_CAST(altimeterRelativeAltitude  as float) as Altitude,
+    TRY_CAST(System.TimeStamp as datetime) Time,
+    activity as Activity,
+    CASE deviceOrientation
+        WHEN '5' THEN 'Face Up'
+        WHEN '4' THEN 'Landscape Right'
+        WHEN '3' THEN 'Landscape Left'
+        WHEN '2' THEN 'Portrait Upside Down'
+        WHEN '1' THEN 'Portrait'
+        WHEN '6' THEN 'Face Down'
+        ELSE 'Unknown'
+    END AS Position,
+    TRY_CAST(motionYaw  as float) as Yaw,
+    TRY_CAST(motionRoll  as float) as Roll,
+    TRY_CAST(motionPitch  as float) as Pitch,
+    TRY_CAST(locationMagneticHeading as float) as Heading
+INTO
+    [output-table-storage]
+FROM
+    [input]
+*/
+
+/*Device orientation change detection output into a service bus topic (for notifications)*/
+/*SELECT
+    deviceID as Device,
+    TRY_CAST(System.TimeStamp as datetime) Time,
+    CASE deviceOrientation
+        WHEN '5' THEN 'Face Up'
+        WHEN '4' THEN 'Landscape Right'
+        WHEN '3' THEN 'Landscape Left'
+        WHEN '2' THEN 'Portrait Upside Down'
+        WHEN '1' THEN 'Portrait'
+        WHEN '6' THEN 'Face Down'
+        ELSE 'Unknown'
+    END AS Position,
+    CASE LAG(deviceOrientation, 1) OVER (LIMIT DURATION(second, 2))
+        WHEN '5' THEN 'Face Up'
+        WHEN '4' THEN 'Landscape Right'
+        WHEN '3' THEN 'Landscape Left'
+        WHEN '2' THEN 'Portrait Upside Down'
+        WHEN '1' THEN 'Portrait'
+        WHEN '6' THEN 'Face Down'
+        ELSE 'Unknown'
+    END AS PrevPosition
+INTO
+    [notification-output]
+FROM
+    [input]
+WHERE
+    LAG(deviceOrientation, 1) OVER (LIMIT DURATION(second, 2)) <> deviceOrientation
+*/
+
+/*Pass-through into Document DB*/
+/*SELECT
+    CONCAT(deviceID, '-', CAST(System.TimeStamp as nvarchar(max))) as PK,
+    TRY_CAST(deviceID as nvarchar(max)) as Device,
+    TRY_CAST(locationLatitude as float) as Latitude,
+    TRY_CAST(locationLongitude  as float) as Longitude,
+    TRY_CAST(locationSpeed  as float) as Speed,
+    TRY_CAST(deviceOrientation as float) as Orientation,
+    TRY_CAST(altimeterRelativeAltitude  as float) as Altitude,
+    TRY_CAST(System.TimeStamp as datetime) Time,
+    TRY_CAST(activity as nvarchar(max)) as Activity,
+    CASE deviceOrientation
+        WHEN '5' THEN 'Face Up'
+        WHEN '4' THEN 'Landscape Right'
+        WHEN '3' THEN 'Landscape Left'
+        WHEN '2' THEN 'Portrait Upside Down'
+        WHEN '1' THEN 'Portrait'
+        WHEN '6' THEN 'Face Down'
+        ELSE 'Unknown'
+    END AS Position,
+    TRY_CAST(motionYaw  as float) as Yaw,
+    TRY_CAST(motionRoll  as float) as Roll,
+    TRY_CAST(motionPitch  as float) as Pitch,
+    TRY_CAST(locationMagneticHeading as float) as Heading
+INTO
+    [output-document-db]
+FROM
+    [input]
+*/
