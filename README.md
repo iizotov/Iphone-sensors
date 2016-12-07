@@ -5,7 +5,7 @@
 *Iphone Sensors* is a solution for all you tinkerers out there who want to have a play with the Azure IoT suite but don't have a RaspberryPi or an Arduino or don't want to simulate sensor data. All you need is an Iphone (packed with sensors) and a Microsoft Azure Subscription (you can get a trial one from https://azure.microsoft.com/en-us/free/). 
 
 ## Getting started
-0. Install Device Explorer. A pre-built version of the Device Explorer application for Windows can be downloaded by clicking on this link: Downloads (Scroll down for SetupDeviceExplorer.msi). The default installation directory for this application is "C:\Program Files (x86)\Microsoft\DeviceExplorer". You might want to pin the DeviceExplorer.exe application to the taskbar for easier access.
+0. Install Device Explorer. A pre-built version of the Device Explorer application for Windows can be downloaded by clicking on this link: https://github.com/Azure/azure-iot-sdks/releases (Scroll down for SetupDeviceExplorer.msi). The default installation directory for this application is "C:\Program Files (x86)\Microsoft\DeviceExplorer". You might want to pin the DeviceExplorer.exe application to the taskbar for easier access.
 1. Install an Iphone app called SensorLog
 2. Provision a php Web App with the code from the *1. Web App* folder. The App will do the protocol translation from SensorLog HTTP GET/PUSH of csv data to an IoT or Event Hub REST call, essentially becoming a simple IoT Cloud Gateway
 3. Write down the URL of your Web App and update SensorLog settings
