@@ -24,7 +24,7 @@
 10. Fire up the Iphone app and the Stream Analytics Job. Once the first message comes through the ASA, a new data source will show up in Power BI which you can start start building live dashboards against, for more info refer to https://powerbi.microsoft.com/en-us/blog/outputting-real-time-stream-analytics-data-to-a-power-bi-dashboard/
 
 ## Architecture
-<img src="https://raw.githubusercontent.com/iizotov/Iphone-sensors/architecture.png">
+<img src="https://raw.githubusercontent.com/iizotov/Iphone-sensors/master/architecture.png">
 
 ## Additional Reading
 Reference Architecture: https://azure.microsoft.com/en-us/updates/microsoft-azure-iot-reference-architecture-available/
